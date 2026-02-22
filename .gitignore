@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+
+# ChromaDB
+chroma_db/
+
+# IDE
+.idea/
+
+# OS
+.DS_Store
