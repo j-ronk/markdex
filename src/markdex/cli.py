@@ -18,29 +18,36 @@ def cmd_serve(args):
 
 def cmd_list(args):
     """List indexed files."""
-    from markdex.config import CHROMA_DB_PATH, COLLECTION_NAME, ensure_data_dir
-    import chromadb
+    from markdex.indexer import list_indexed
 
-    ensure_data_dir()
-    db = chromadb.PersistentClient(path=CHROMA_DB_PATH)
-    collection = db.get_or_create_collection(
-        COLLECTION_NAME, metadata={"hnsw:space": "cosine"}
-    )
-
-    results = collection.get(include=["metadatas"])
-    if not results["metadatas"]:
+    entries = list_indexed()
+    if not entries:
         print("No files indexed. Run: markdex index <path>")
         return
 
-    files: dict[str, int] = {}
-    for meta in results["metadatas"]:
-        fp = meta.get("file_path", "unknown")
-        files[fp] = files.get(fp, 0) + 1
+    total_chunks = sum(count for _, count in entries)
+    print(f"Indexed {len(entries)} file(s), {total_chunks} chunk(s):\n")
+    for i, (fp, count) in enumerate(entries, 1):
+        print(f"  [{i}] {fp} ({count} chunks)")
 
-    total_chunks = sum(files.values())
-    print(f"Indexed {len(files)} file(s), {total_chunks} chunk(s):\n")
-    for fp, count in sorted(files.items()):
-        print(f"  {fp} ({count} chunks)")
+
+def cmd_remove(args):
+    """Remove a file from the index by its number in `markdex list`."""
+    from markdex.indexer import list_indexed, remove_from_index
+
+    entries = list_indexed()
+    if not entries:
+        print("No files indexed.")
+        sys.exit(1)
+
+    num = args.number
+    if num < 1 or num > len(entries):
+        print(f"Invalid number {num}. Run `markdex list` to see valid entries (1-{len(entries)}).")
+        sys.exit(1)
+
+    file_path, _ = entries[num - 1]
+    removed = remove_from_index(file_path)
+    print(f"Removed {removed} chunk(s) for {file_path}")
 
 
 def main():
@@ -63,6 +70,11 @@ def main():
     # markdex list
     list_parser = subparsers.add_parser("list", help="List indexed files")
     list_parser.set_defaults(func=cmd_list)
+
+    # markdex remove
+    remove_parser = subparsers.add_parser("remove", help="Remove a file from the index")
+    remove_parser.add_argument("number", type=int, help="File number from `markdex list`")
+    remove_parser.set_defaults(func=cmd_remove)
 
     args = parser.parse_args()
     args.func(args)

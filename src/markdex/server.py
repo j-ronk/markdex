@@ -81,25 +81,51 @@ def query_docs(query: str, top_k: int = 5) -> str:
 
 @mcp.tool()
 def list_indexed_files() -> str:
-    """List all Markdown files currently in the index."""
-    collection = _get_collection()
+    """List all Markdown files currently in the index with numbered entries. Use the number with remove_document() to remove a file."""
+    from markdex.indexer import list_indexed
 
-    results = collection.get(include=["metadatas"])
+    entries = list_indexed(
+        chroma_path=config.CHROMA_DB_PATH,
+        collection_name=config.COLLECTION_NAME,
+    )
 
-    if not results["metadatas"]:
+    if not entries:
         return "No files indexed. Run: markdex index <path>"
 
-    files: dict[str, int] = {}
-    for meta in results["metadatas"]:
-        fp = meta.get("file_path", "unknown")
-        files[fp] = files.get(fp, 0) + 1
-
-    total_chunks = sum(files.values())
-    lines = [f"Indexed {len(files)} file(s), {total_chunks} chunk(s):\n"]
-    for fp, count in sorted(files.items()):
-        lines.append(f"  {fp} ({count} chunks)")
+    total_chunks = sum(count for _, count in entries)
+    lines = [f"Indexed {len(entries)} file(s), {total_chunks} chunk(s):\n"]
+    for i, (fp, count) in enumerate(entries, 1):
+        lines.append(f"  [{i}] {fp} ({count} chunks)")
 
     return "\n".join(lines)
+
+
+@mcp.tool()
+def remove_document(file_number: int) -> str:
+    """Remove a file from the index by its number from list_indexed_files()."""
+    from markdex.indexer import list_indexed, remove_from_index
+
+    entries = list_indexed(
+        chroma_path=config.CHROMA_DB_PATH,
+        collection_name=config.COLLECTION_NAME,
+    )
+
+    if not entries:
+        return "No files indexed."
+
+    if file_number < 1 or file_number > len(entries):
+        return f"Invalid number {file_number}. Use list_indexed_files() to see valid entries (1-{len(entries)})."
+
+    file_path, _ = entries[file_number - 1]
+    removed = remove_from_index(
+        file_path,
+        chroma_path=config.CHROMA_DB_PATH,
+        collection_name=config.COLLECTION_NAME,
+    )
+
+    _reset_collection()
+
+    return f"Removed {removed} chunk(s) for {file_path}"
 
 
 @mcp.tool()

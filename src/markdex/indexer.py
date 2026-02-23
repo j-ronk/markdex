@@ -101,3 +101,55 @@ def index_documents(
 
     print(f"\nIndexed {len(all_chunks)} chunks from {len(md_files)} file(s).")
     return {"files": len(md_files), "chunks": len(all_chunks)}
+
+
+def list_indexed(
+    chroma_path: str = CHROMA_DB_PATH,
+    collection_name: str = COLLECTION_NAME,
+) -> list[tuple[str, int]]:
+    """Return indexed files as a sorted list of (file_path, chunk_count) tuples.
+
+    The list order is stable (sorted by file path) so callers can use
+    1-based indices for user-facing numbering.
+    """
+    ensure_data_dir()
+    db = chromadb.PersistentClient(path=chroma_path)
+    collection = db.get_or_create_collection(
+        collection_name, metadata={"hnsw:space": "cosine"}
+    )
+
+    results = collection.get(include=["metadatas"])
+    if not results["metadatas"]:
+        return []
+
+    files: dict[str, int] = {}
+    for meta in results["metadatas"]:
+        fp = meta.get("file_path", "unknown")
+        files[fp] = files.get(fp, 0) + 1
+
+    return sorted(files.items())
+
+
+def remove_from_index(
+    file_path: str,
+    chroma_path: str = CHROMA_DB_PATH,
+    collection_name: str = COLLECTION_NAME,
+) -> int:
+    """Remove all chunks for a given file_path from the index.
+
+    Returns the number of chunks deleted.
+    """
+    ensure_data_dir()
+    db = chromadb.PersistentClient(path=chroma_path)
+    collection = db.get_or_create_collection(
+        collection_name, metadata={"hnsw:space": "cosine"}
+    )
+
+    results = collection.get(
+        where={"file_path": file_path},
+        include=[],
+    )
+    ids_to_delete = results["ids"]
+    if ids_to_delete:
+        collection.delete(ids=ids_to_delete)
+    return len(ids_to_delete)
