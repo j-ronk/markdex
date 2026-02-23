@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Index Markdown files into ChromaDB for markdex retrieval."""
 
+import hashlib
 import sys
 from pathlib import Path
 
@@ -85,7 +86,10 @@ def index_documents(
     print(f"Embedding {len(texts)} chunks...")
     embeddings = model.encode(texts, show_progress_bar=True).tolist()
 
-    ids = [f"chunk_{i}" for i in range(len(all_chunks))]
+    ids = [
+        hashlib.sha256(f"{c.metadata['file_path']}::{c.text}".encode()).hexdigest()[:16]
+        for c in all_chunks
+    ]
     metadatas = []
     for c in all_chunks:
         meta = dict(c.metadata)
