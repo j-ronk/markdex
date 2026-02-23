@@ -86,10 +86,17 @@ def index_documents(
     print(f"Embedding {len(texts)} chunks...")
     embeddings = model.encode(texts, show_progress_bar=True).tolist()
 
-    ids = [
-        hashlib.sha256(f"{c.metadata['file_path']}::{c.text}".encode()).hexdigest()[:16]
-        for c in all_chunks
-    ]
+    # Build stable IDs: hash of file_path + per-file chunk index.
+    # Per-file index ensures uniqueness even when chunks share identical text.
+    file_chunk_counts: dict[str, int] = {}
+    ids = []
+    for c in all_chunks:
+        fp = c.metadata["file_path"]
+        idx = file_chunk_counts.get(fp, 0)
+        file_chunk_counts[fp] = idx + 1
+        ids.append(
+            hashlib.sha256(f"{fp}::{idx}".encode()).hexdigest()[:16]
+        )
     metadatas = []
     for c in all_chunks:
         meta = dict(c.metadata)
