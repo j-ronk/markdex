@@ -4,6 +4,8 @@ Index your Markdown files and make them retrievable by AI through semantic searc
 
 markdex chunks your documents by heading, embeds them locally, and serves them over [MCP](https://modelcontextprotocol.io/) so tools like Claude Code can find exactly the right section when they need it. After initial model download, everything runs locally — your documents never leave your machine.
 
+I use markdex for indexing books, resources, and vehicle service manuals.
+
 ## Install
 
 ```bash
