@@ -7,11 +7,28 @@ name = "markdex"
 version = "0.1.0"
 description = "Local Markdown indexing and retrieval via MCP"
 requires-python = ">=3.10"
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "j-ronk" }]
+keywords = ["markdown", "indexing", "mcp", "search", "embeddings"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
 dependencies = [
     "chromadb>=0.5.0",
     "sentence-transformers>=3.0.0",
     "mcp>=1.0.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/j-ronk/markdex"
+Repository = "https://github.com/j-ronk/markdex"
+Issues = "https://github.com/j-ronk/markdex/issues"
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0.0"]
