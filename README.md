@@ -1,16 +1,22 @@
 # markdex
 
-Local Markdown indexing and retrieval via MCP. Index your Markdown documents and query them from Claude Code using semantic search.
+Index your Markdown files and make them retrievable by AI through semantic search.
+
+markdex chunks your documents by heading, embeds them locally, and serves them over [MCP](https://modelcontextprotocol.io/) so tools like Claude Code can find exactly the right section when they need it. After initial model download, everything runs locally — your documents never leave your machine.
 
 ## Install
 
 ```bash
-git clone <repo-url>
-cd markdex
-pipx install -e . --python python3.13
+pip install markdex
 ```
 
-This puts `markdex` on your PATH globally via an isolated venv. Requires [pipx](https://pipx.pypa.io/) (`brew install pipx`). Use Python 3.13 or earlier (chromadb doesn't yet support 3.14).
+Or install globally with [pipx](https://pipx.pypa.io/):
+
+```bash
+pipx install markdex
+```
+
+Requires Python 3.10–3.13 (chromadb doesn't yet support 3.14).
 
 ## Quick Start
 
@@ -38,6 +44,7 @@ Then in any Claude Code session, you can:
 - **Search** your indexed docs (the `query_docs` tool)
 - **List** indexed files (the `list_indexed_files` tool)
 - **Index** new documents from conversation (the `index_document` tool)
+- **Remove** documents from the index (the `remove_document` tool)
 
 ## Commands
 
@@ -46,6 +53,7 @@ Then in any Claude Code session, you can:
 | `markdex index <path> [--reset]` | Index .md files from a file or directory |
 | `markdex serve` | Start the MCP server (stdio transport) |
 | `markdex list` | List all indexed files |
+| `markdex remove <number>` | Remove a file from the index (by number from `list`) |
 
 ## Data Storage
 

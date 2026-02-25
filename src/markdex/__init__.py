@@ -1,3 +1,8 @@
 """Markdex: local Markdown indexing and retrieval via MCP."""
 
-__version__ = "0.1.0"
+from importlib.metadata import version, PackageNotFoundError
+
+try:
+    __version__ = version("markdex")
+except PackageNotFoundError:
+    __version__ = "0.0.0-dev"

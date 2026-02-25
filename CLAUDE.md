@@ -7,6 +7,7 @@ Local Markdown indexing and retrieval via MCP.
 - **Index docs:** `markdex index <path>` (or `markdex index <path> --reset` to rebuild)
 - **Run MCP server:** `markdex serve` (stdio transport, used by Claude Code)
 - **List indexed files:** `markdex list`
+- **Remove file from index:** `markdex remove <number>` (number from `markdex list`)
 - **Run tests:** `pytest tests/ -v`
 
 ## Architecture
@@ -14,8 +15,8 @@ Local Markdown indexing and retrieval via MCP.
 - `src/markdex/config.py` — Centralized paths and constants (`~/.markdex/`)
 - `src/markdex/chunker.py` — Markdown parsing and heading-based chunking
 - `src/markdex/indexer.py` — Reads paths, chunks, embeds, stores in ChromaDB
-- `src/markdex/server.py` — MCP server with `query_docs`, `list_indexed_files`, and `index_document` tools
-- `src/markdex/cli.py` — CLI entry point (`markdex index`, `markdex serve`, `markdex list`)
+- `src/markdex/server.py` — MCP server with `query_docs`, `list_indexed_files`, `index_document`, and `remove_document` tools
+- `src/markdex/cli.py` — CLI entry point (`markdex index`, `markdex serve`, `markdex list`, `markdex remove`)
 
 ## Important Notes
 
